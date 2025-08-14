@@ -8,7 +8,7 @@ By _Mustafa Hussain_
 
 == Abstract
 
-The purpose of this techincal paper is to provide a concise and comprehensive introduction to the Go programming language, with a focus on practical application. One will be guided through the process of installing and configuring a Go development environment, writing and executing their first program as well as understanding the fundamental concepts of the language. Key topics include basic syntax and control structures, package management, error handling, and the principles of Go’s concurrency model. Each section is supported by runnable examples available in the accompanying Git repository, allowing readers to apply concepts immediately and build a solid foundation for Go.
+The purpose of this technical paper is to provide a concise and comprehensive introduction to the Go programming language, with a focus on practical application. One will be guided through the process of installing and configuring a Go development environment, writing and executing their first program as well as understanding the fundamental concepts of the language. Key topics include basic syntax and control structures, package management, error handling, and the principles of Go’s concurrency model. Each section is supported by runnable examples available in the accompanying Git repository, allowing readers to apply concepts immediately and build a solid foundation for Go.
 
 == Why Go?
 
