@@ -48,25 +48,171 @@ Now we need a suitable IDE for the actual coding part of this paper. I will be u
 
 == Go Basics
 
-Before we can start the actual development with Go, there are a few things we have to look at namely:
+Go is based off of C therefore it will have similar types and variables, however they are quite the same throughout all programming languages. Before we can start the actual development with Go, there are a few things we have to look at namely:
 
 . Variables, constants, and types
-.. Go is based off of C therefore it will have similar types and variables, however they are quite the same throughout all programming languages.
 
-. Syntax
-.. ...
+.. Constants
+... Constants are declared at package level, therefore even before we start with our main functions.
+[source, Go]
+----
+package main
+
+import (
+  "fmt"
+)
+
+const (
+    PI              = 3.14159
+    Min             = 55
+    AppName         = "Basics of Go"
+    IsPublic        = false
+)
+----
+
+. Basics
+... These include Strings, integers, floats etc. These are declared in the funcions themselves
+... There are many ways and tricks to declare these variables, this paper covers the most common and practical methods
+
+[source, go]
+----
+func main() {
+
+    
+    // Method 1: full 
+    var name string = "John"
+    var age int = 30
+    var salary float64 = 50000.50
+    var isActive bool = true
+    
+    // Method 2: inferred
+    var city = "New York"  
+    var number = 10.0
+
+    
+    // Method 3: short declaration (most common)
+    country := "USA"
+    zipCode := 10001
+    
+    // Method 4: Multiple variable declaration
+    var (
+        firstName string = "Jane"
+        lastName  string = "Doe" 
+        userID    int    = 12345
+    )
+    
+    // Method 5: Multiple assignment
+    x, y := 10, 20
+    a, b, c := 1, 2.5, "hello"
+----
+
+.. Arrays and Slices
+... Arrays in Go have a fixed length and contain elements of the same type. Once declared, their size cannot be changed. Slices, on the other hand, are built on top of arrays but are far more flexible as they can grow and shrink as needed.
+
+[source, go]
+----
+func main() {
+
+    //array
+    var numbers [5]int   // 0 by default
+    numbers[0] = 1
+    numbers[1] = 2
+    fmt.Println(numbers)               // Output: [1 2 0 0 0]
+
+    // Array with initialization
+    primes := [5]int{2, 3, 5, 7, 11}
+
+    // Slices
+    var fruits []string
+    fruits = append(fruits, "Apple", "Banana")
+    fmt.Println(fruits)                 // Output: [Apple Banana]
+
+    // Slice from array
+    slicePrimes := primes[1:4]
+    fmt.Println(slicePrimes)            // Output: [3 5 7]
+}
+----
+
 . Control structures (if, for, switch)
-.. ...
+... Go offers simple and readable control structures. There is no `while` keyword, the `for` loop covers all looping needs.
+[source, go]
+----
+func main() {
+    // If-else
+    age := 18
+    if age >= 18 {
+        fmt.Println("adult")
+    } else {
+        fmt.Println("under age")
+    }
+
+    // For loop
+    for i := 0; i < 5; i++ {
+        fmt.Println(i)
+    }
+
+    // For as while
+    sum := 1
+    for sum < 100 {
+        sum += sum
+    }
+
+    // Switch
+    day := "Monday"
+    switch day {
+    case "Monday":
+        fmt.Println("Start of the week")
+    case "Friday":
+        fmt.Println("Almost weekend")
+    default:
+        fmt.Println("Midweek day")
+    }
+}
+----
 
 . Functions (including multiple return values)
-.. ...
+... Functions in Go are declared with the `func` keyword and can return multiple values, which is a common pattern in Go programs.
+[source, go]
+----
+func add(a int, b int) int {
+    return a + b
+}
+
+func divide(a, b int) (int, int) {
+    return a / b, a % b
+}
+
+func main() {
+    fmt.Println(add(3, 4))             // Output: 7
+
+    quotient, remainder := divide(10, 3)
+    fmt.Println(quotient, remainder)   // Output: 3 1
+}
+----
+
 . Scope and naming conventions
-.. ...
+... Variables in Go have scope based on where they are declared. Package-level variables are accessible throughout the package, while function-level variables are local to that function. Exported identifiers (accessible from other packages) start with an uppercase letter.
+[source, go]
+----
+package main
 
+import "fmt"
 
+// Package-level variable (exported)
+var Version = "1.0"
+
+// Package-level variable (unexported)
+var internalID = 123
+
+func main() {
+    localVar := "I am local"
+    fmt.Println(localVar)
+    fmt.Println(Version)
+}
+----
 == Your First Go Program
 
-[source,go]
+[source, go]
 ----
 package main
 
