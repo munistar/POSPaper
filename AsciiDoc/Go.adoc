@@ -1,0 +1,115 @@
+= Guide to Go
+By _Mustafa Hussain_
+:toc:
+:toclevels: 2
+:sectnums:
+:icons: font
+:source-highlighter: blue
+
+== Abstract
+
+The purpose of this techincal paper is to provide a concise and comprehensive introduction to the Go programming language, with a focus on practical application. One will be guided through the process of installing and configuring a Go development environment, writing and executing their first program as well as understanding the fundamental concepts of the language. Key topics include basic syntax and control structures, package management, error handling, and the principles of Go’s concurrency model. Each section is supported by runnable examples available in the accompanying Git repository, allowing readers to apply concepts immediately and build a solid foundation for Go.
+
+== Why Go?
+
+Go originated in mid to late 2007 at the Google headquarters. The so called founding fathers were Robert Griesemer, Rob Pike and Ken Thompson. They were stumped by an engineering challenge. Rather tackling the issue itself, they decided to innovate and create Go. This was due to the fact that there was no other programming language that they could use which would fit their criteria. After the project grew and more employees from Google joined the team, the first stable version was released in March of 2012. Today Go can be seen being used by Google, Microsoft, PayPal, American Express, Netflix, Uber, X, Twitch and many more. + 
+Go offers simplicity alongside a simple syntax. This included a fast compiler, concurrency and tooling. Go is designed for modern Hardware whereas programming languages in 2007, such as C, C++, JAVA and Python were not. 
+
+== Introduction to Go
+
+There are many ways to download Go. Let's start with the easiest and the simplest. link:https://go.dev[Go] and install it from their download page. For Apple users, please note that the download file needs to align with the processor you have, whether its ARM64 (M-Chip) or an intel chip. This is an alternative if the direct install from the website does not work.
+
+For MacOs or Linux
+[source, BASH]
+----
+VERSION=$(curl -s https://golang.org/VERSION?m=text) && OS=$(uname -s | tr '[:upper:]' '[:lower:]') && ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && curl -L "https://golang.org/dl/${VERSION}.${OS}-${ARCH}.tar.gz" | sudo tar -C /usr/local -xzf - && echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.$(basename $SHELL)rc && echo "Go installed! Restart terminal or run: source ~/.$(basename $SHELL)rc"
+----
+
+For Windows in Git Bash
+[source, BASH]
+----
+VERSION=$(curl -s https://golang.org/VERSION?m=text) && curl -L "https://golang.org/dl/${VERSION}.windows-amd64.zip" -o /tmp/go.zip && cd /tmp && unzip -q go.zip && [ -d "/c/Program Files/go" ] && rm -rf "/c/Program Files/go"; mv go "/c/Program Files/" && echo 'export PATH=$PATH:"/c/Program Files/go/bin"' >> ~/.bashrc && echo "Go installed! Restart terminal or run: source ~/.bashrc"
+----
+
+Once go has been installed make sure you have the correct version installed by checking it with 
+
+[source, BASH]
+----
+go version
+----
+
+Now we need a suitable IDE for the actual coding part of this paper. I will be using IntelliJ by JetBrains (this is only available for IntelliJ Ultimate) but a simpler IDE is also Visual Studio Code. One needs to install the plugins for the respected IDE for Go to work properly. 
+
+
+== Your First Go Program
+
+[source,go]
+----
+package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, Go!")
+}
+----
+
+* How to compile and run
+* Explanation of basic syntax
+
+== Go Basics
+
+* Variables, constants, and types
+* Control structures (if, for, switch)
+* Functions (including multiple return values)
+* Scope and naming conventions
+
+== Structs and Interfaces
+
+* Defining and using `struct`
+* Methods and receivers
+* Interfaces and polymorphism
+
+== Error Handling in Go
+
+* Idiomatic error checking
+* Using the `errors` package
+* Custom error types (optional)
+
+== Go Concurrency
+
+* Goroutines: launching lightweight threads
+* Channels: communication between goroutines
+* `select` keyword
+* Sample: worker pool example
+
+== Project Structure and Go Modules
+
+* Using `go mod` properly
+* Recommended folder layout
+* Dependency management
+
+== Testing in Go
+
+* Using the `testing` package
+* Writing and running unit tests
+* Example with table-driven tests
+
+== Hashing and Websockets
+
+* Community links (Go.dev, Go by Example, Effective Go)
+* Tools (`go fmt`, `golint`, `go vet`)
+* Where to go next (web frameworks, microservices, etc.)
+
+== Appendix
+
+* Link to link:https://Github.com[GitHub] Repository
+* File structure
+* System requirements
+
+== Sources
+
+. link:https://medium.com/geekculture/learn-go-part-1-the-beginning-723746f2e8b0[Go-How It All Began _by Medium_ ]
+. link:https://en.wikipedia.org/wiki/Go_(programming_language)[Wikipedia]
+. link:https://gowebexamples.com/password-hashing/[Go Web Examples]
+. link:https://go.dev/doc/articles/wiki[Go.dev]
