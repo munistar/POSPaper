@@ -19,26 +19,49 @@ Go offers simplicity alongside a simple syntax. This included a fast compiler, c
 
 There are many ways to download Go. Let's start with the easiest and the simplest. link:https://go.dev[Go] and install it from their download page. For Apple users, please note that the download file needs to align with the processor you have, whether its ARM64 (M-Chip) or an intel chip. This is an alternative if the direct install from the website does not work.
 
-For MacOs or Linux
+For MacOS Intel based
 [source, BASH]
 ----
-VERSION=$(curl -s https://golang.org/VERSION?m=text) && OS=$(uname -s | tr '[:upper:]' '[:lower:]') && ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && curl -L "https://golang.org/dl/${VERSION}.${OS}-${ARCH}.tar.gz" | sudo tar -C /usr/local -xzf - && echo "export PATH=\$PATH:/usr/local/go/bin" >> ~/.$(basename $SHELL)rc && echo "Go installed! Restart terminal or run: source ~/.$(basename $SHELL)rc"
+curl -LO https://go.dev/dl/go1.25.0.darwin-amd64.pkg && sudo installer -pkg go1.25.0.darwin-amd64.pkg -target /
+----
+Auto check for base architecture
+[source, BASH]
+----
+ARCH=$(uname -m) && if [ "$ARCH" = "x86_64" ]; then PKG=go1.25.0.darwin-amd64.pkg; else PKG=go1.25.0.darwin-arm64.pkg; fi && curl -LO https://go.dev/dl/$PKG && sudo installer -pkg $PKG -target /
 ----
 
 For Windows in Git Bash
 [source, BASH]
 ----
-VERSION=$(curl -s https://golang.org/VERSION?m=text) && curl -L "https://golang.org/dl/${VERSION}.windows-amd64.zip" -o /tmp/go.zip && cd /tmp && unzip -q go.zip && [ -d "/c/Program Files/go" ] && rm -rf "/c/Program Files/go"; mv go "/c/Program Files/" && echo 'export PATH=$PATH:"/c/Program Files/go/bin"' >> ~/.bashrc && echo "Go installed! Restart terminal or run: source ~/.bashrc"
+curl -LO https://go.dev/dl/go1.25.0.windows-amd64.msi && cmd //c start "" go1.25.0.windows-amd64.msi
 ----
 
-Once go has been installed make sure you have the correct version installed by checking it with 
+Once go has been installed make sure you have the correct version (1.25.0) installed by checking it with:
 
 [source, BASH]
 ----
 go version
 ----
 
-Now we need a suitable IDE for the actual coding part of this paper. I will be using IntelliJ by JetBrains (this is only available for IntelliJ Ultimate) but a simpler IDE is also Visual Studio Code. One needs to install the plugins for the respected IDE for Go to work properly. 
+Now we need a suitable IDE for the actual coding part of this paper. I will be using GoLand by JetBrains, however there are many IDEs that support Go, but a simpler IDE is also Visual Studio Code. One needs to install the plugins for the respected IDE for Go to work properly.
+
+
+== Go Basics
+
+Before we can start the actual development with Go, there are a few things we have to look at namely:
+
+. Variables, constants, and types
+.. Go is based off of C therefore it will have similar types and variables, however they are quite the same throughout all programming languages.
+
+. Syntax
+.. ...
+. Control structures (if, for, switch)
+.. ...
+
+. Functions (including multiple return values)
+.. ...
+. Scope and naming conventions
+.. ...
 
 
 == Your First Go Program
@@ -56,13 +79,6 @@ func main() {
 
 * How to compile and run
 * Explanation of basic syntax
-
-== Go Basics
-
-* Variables, constants, and types
-* Control structures (if, for, switch)
-* Functions (including multiple return values)
-* Scope and naming conventions
 
 == Structs and Interfaces
 
