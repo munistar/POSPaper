@@ -48,6 +48,8 @@ Now we need a suitable IDE for the actual coding part of this paper. I will be u
 
 == Go Basics
 
+A little Tip: One needs to run the "Go Tutorial" file so that everything runs smoothly because Go runs file one at a time, therefore we can not run "Go.main" and expect the "basics()" function to be recognized / defined.
+
 Go is based off of C therefore it will have similar types and variables, however they are quite the same throughout all programming languages. Before we can start the actual development with Go, there are a few things we have to look at namely:
 
 . Variables, constants, and types
@@ -210,18 +212,9 @@ func main() {
     fmt.Println(Version)
 }
 ----
-== Your First Go Program
+== Our Application
 
-[source, go]
-----
-package main
 
-import "fmt"
-
-func main() {
-    fmt.Println("Hello, Go!")
-}
-----
 
 * How to compile and run
 * Explanation of basic syntax
