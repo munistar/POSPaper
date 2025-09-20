@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real Estate Properties</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .property { border: 1px solid #ccc; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+<h1>Real Estate Properties</h1>
+
+<h2>Add Property</h2>
+<form id="addForm">
+    <input type="text" id="title" placeholder="Title" required>
+    <input type="text" id="city" placeholder="City" required>
+    <input type="number" id="size" placeholder="Size (sqm)" required>
+    <button type="submit">Add</button>
+</form>
+
+<h2>Properties</h2>
+<div id="list"></div>
+
+<script>
+    const API = "http://localhost:8080/api/v1/properties";
+
+    async function loadProperties() {
+        const res = await fetch(API);
+        const data = await res.json();
+        const list = document.getElementById("list");
+        list.innerHTML = "";
+        data.forEach(p => {
+            const div = document.createElement("div");
+            div.className = "property";
+            div.innerHTML = `
+          <b>${p.title}</b> (${p.size_sqm} sqm, ${p.address.city})<br>
+          <button onclick="deleteProperty('${p.id}')">Delete</button>
+        `;
+            list.appendChild(div);
+        });
+    }
+
+    async function deleteProperty(id) {
+        await fetch(API + "/" + id, { method: "DELETE" });
+        loadProperties();
+    }
+
+    document.getElementById("addForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const prop = {
+            title: document.getElementById("title").value,
+            description: "",
+            type: "apartment",
+            size_sqm: parseInt(document.getElementById("size").value),
+            bedrooms: 0,
+            bathrooms: 0,
+            address: { street: "", city: document.getElementById("city").value, postal_code: "", country: "" }
+        };
+        await fetch(API, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(prop)
+        });
+        e.target.reset();
+        loadProperties();
+    });
+
+    loadProperties();
+</script>
+</body>
+</html>
