@@ -5,31 +5,22 @@ Application/
 ├─ internal/
 │  ├─ domain/                   # pure domain structs and domain-specific errors
 │  │  ├─ property.go
-│  │  ├─ listing.go
 │  │  └─ ...
 │  ├─ repo/                     # repository interfaces (and maybe implementations)
-│  │  ├─ property_repo.go
-│  │  └─ postgres/              # postgres implementation of repos
-│  │     ├─ property_repo_pg.go
-│  │     └─ migrations/
+│  │  ├─ property_mem.go
 │  ├─ service/                  # business logic / use-cases
-│  │  ├─ listing_service.go
-│  │  └─ listing_service_test.go
+│  │  ├─ property_service.go
 │  ├─ transport/
 │  │  └─ http/                  # http handlers, router
 │  │     ├─ handler_listing.go
 │  │     ├─ routes.go
-│  │     └─ middleware.go
-│  ├─ api/                      # request/response DTOs
-│  ├─ auth/                     # auth logic, jwt generation/validation
-│  ├─ config/                   # config loader
-│  ├─ db/                       # db connection setup, migrations runner
-│  └─ mocks/                    # auto-generated mocks (go:generate, mockgen or testify)
 ├─ web/                         # small frontend: React app or static SPA
-│  ├─ package.json
-│  └─ src/
+│  ├─ index.html
 ├─ test/                        # integration tests, docker-compose for test db
-│  └─ integration_test.go
+│  └─ Domain/
+│  └─ Repository/
+│  └─ service/
+│  └─ transport/
 ├─ scripts/
 │  └─ run_local.sh
 ├─ docker-compose.yml

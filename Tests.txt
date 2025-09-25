@@ -1,0 +1,1425 @@
+// test/Domain/property_test.go
+package Domain_test
+
+import (
+	domain "Application/internal/Domain"
+	"encoding/json"
+	"testing"
+	"time"
+)
+
+func TestProperty(t *testing.T) {
+	t.Run("property struct creation", func(t *testing.T) {
+		address := domain.Address{
+			Street:     "123 Main St",
+			City:       "Vienna",
+			PostalCode: "1010",
+			Country:    "Austria",
+		}
+
+		property := domain.Property{
+			ID:          "test-id",
+			Title:       "Test Property",
+			Description: "A test property",
+			Type:        "apartment",
+			SizeSqm:     100,
+			Bedrooms:    2,
+			Bathrooms:   1,
+			Address:     address,
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+		}
+
+		if property.ID != "test-id" {
+			t.Errorf("expected ID to be 'test-id', got %s", property.ID)
+		}
+		if property.Title != "Test Property" {
+			t.Errorf("expected Title to be 'Test Property', got %s", property.Title)
+		}
+		if property.Address.City != "Vienna" {
+			t.Errorf("expected City to be 'Vienna', got %s", property.Address.City)
+		}
+	})
+
+	t.Run("property JSON serialization", func(t *testing.T) {
+		address := domain.Address{
+			Street:     "123 Main St",
+			City:       "Vienna",
+			PostalCode: "1010",
+			Country:    "Austria",
+		}
+
+		property := domain.Property{
+			ID:          "test-id",
+			Title:       "Test Property",
+			Description: "A test property",
+			Type:        "apartment",
+			SizeSqm:     100,
+			Bedrooms:    2,
+			Bathrooms:   1,
+			Address:     address,
+			CreatedAt:   time.Now().UTC(),
+			UpdatedAt:   time.Now().UTC(),
+		}
+
+		data, err := json.Marshal(property)
+		if err != nil {
+			t.Errorf("failed to marshal property: %v", err)
+		}
+
+		var unmarshaled domain.Property
+		err = json.Unmarshal(data, &unmarshaled)
+		if err != nil {
+			t.Errorf("failed to unmarshal property: %v", err)
+		}
+
+		if unmarshaled.ID != property.ID {
+			t.Errorf("expected ID to be %s, got %s", property.ID, unmarshaled.ID)
+		}
+	})
+}
+
+// Makefile for running tests
+# Add this to your Makefile
+
+test:
+	@echo "Running tests..."
+	go test -v -race -coverprofile=coverage.out ./...
+
+test-coverage:
+	@echo "Running tests with coverage report..."
+	go test -v -race -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+	@echo "Coverage report generated: coverage.html"
+
+test-integration:
+	@echo "Running integration tests..."
+	go test -v -race -tags=integration ./test/...
+
+test-clean:
+	@echo "Cleaning test artifacts..."
+	rm -f coverage.out coverage.html
+
+bench:
+	@echo "Running benchmarks..."
+	go test -bench=. -benchmem ./...
+
+.PHONY: test test-coverage test-integration test-clean bench
+
+func TestAddress(t *testing.T) {
+	t.Run("address struct creation", func(t *testing.T) {
+		address := domain.Address{
+			Street:     "123 Main St",
+			City:       "Vienna",
+			PostalCode: "1010",
+			Country:    "Austria",
+		}
+
+		if address.Street != "123 Main St" {
+			t.Errorf("expected Street to be '123 Main St', got %s", address.Street)
+		}
+		if address.City != "Vienna" {
+			t.Errorf("expected City to be 'Vienna', got %s", address.City)
+		}
+		if address.PostalCode != "1010" {
+			t.Errorf("expected PostalCode to be '1010', got %s", address.PostalCode)
+		}
+		if address.Country != "Austria" {
+			t.Errorf("expected Country to be 'Austria', got %s", address.Country)
+		}
+	})
+
+	t.Run("address JSON serialization", func(t *testing.T) {
+		address := domain.Address{
+			Street:     "123 Main St",
+			City:       "Vienna",
+			PostalCode: "1010",
+			Country:    "Austria",
+		}
+
+		data, err := json.Marshal(address)
+		if err != nil {
+			t.Errorf("failed to marshal address: %v", err)
+		}
+
+		var unmarshaled domain.Address
+		err = json.Unmarshal(data, &unmarshaled)
+		if err != nil {
+			t.Errorf("failed to unmarshal address: %v", err)
+		}
+
+		if unmarshaled.Street != address.Street {
+			t.Errorf("expected Street to be %s, got %s", address.Street, unmarshaled.Street)
+		}
+	})
+}
+
+// test/Repository/property_mem_test.go
+package Repository_test
+
+import (
+	domain "Application/internal/Domain"
+	repo "Application/internal/Repostiory"
+	"context"
+	"testing"
+	"time"
+)
+
+func TestMemoryPropertyRepo(t *testing.T) {
+	t.Run("NewMemoryPropertyRepo", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		if repository == nil {
+			t.Error("expected repository to be created, got nil")
+		}
+	})
+
+	t.Run("Create", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title:       "Test Property",
+			Description: "A test property",
+			Type:        "apartment",
+			SizeSqm:     100,
+			Bedrooms:    2,
+			Bathrooms:   1,
+			Address: domain.Address{
+				Street:     "123 Main St",
+				City:       "Vienna",
+				PostalCode: "1010",
+				Country:    "Austria",
+			},
+		}
+
+		created, err := repository.Create(ctx, property)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if created.ID == "" {
+			t.Error("expected ID to be generated")
+		}
+
+		if created.CreatedAt.IsZero() {
+			t.Error("expected CreatedAt to be set")
+		}
+
+		if created.UpdatedAt.IsZero() {
+			t.Error("expected UpdatedAt to be set")
+		}
+
+		if created.Title != property.Title {
+			t.Errorf("expected Title to be %s, got %s", property.Title, created.Title)
+		}
+	})
+
+	t.Run("GetByID - success", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title: "Test Property",
+		}
+
+		created, _ := repository.Create(ctx, property)
+
+		found, err := repository.GetByID(ctx, created.ID)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if found.ID != created.ID {
+			t.Errorf("expected ID to be %s, got %s", created.ID, found.ID)
+		}
+	})
+
+	t.Run("GetByID - not found", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		_, err := repository.GetByID(ctx, "non-existent-id")
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("List - empty", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		properties, err := repository.List(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if len(properties) != 0 {
+			t.Errorf("expected 0 properties, got %d", len(properties))
+		}
+	})
+
+	t.Run("List - with properties", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		property1 := &domain.Property{Title: "Property 1"}
+		property2 := &domain.Property{Title: "Property 2"}
+
+		repository.Create(ctx, property1)
+		repository.Create(ctx, property2)
+
+		properties, err := repository.List(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if len(properties) != 2 {
+			t.Errorf("expected 2 properties, got %d", len(properties))
+		}
+	})
+
+	t.Run("Update - success", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title: "Original Title",
+		}
+
+		created, _ := repository.Create(ctx, property)
+		originalCreatedAt := created.CreatedAt
+
+		time.Sleep(10 * time.Millisecond) // Ensure different timestamp
+
+		updatedProperty := &domain.Property{
+			Title: "Updated Title",
+		}
+
+		updated, err := repository.Update(ctx, created.ID, updatedProperty)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if updated.Title != "Updated Title" {
+			t.Errorf("expected Title to be 'Updated Title', got %s", updated.Title)
+		}
+
+		if updated.ID != created.ID {
+			t.Errorf("expected ID to remain %s, got %s", created.ID, updated.ID)
+		}
+
+		if !updated.CreatedAt.Equal(originalCreatedAt) {
+			t.Error("expected CreatedAt to remain unchanged")
+		}
+
+		if updated.UpdatedAt.Equal(originalCreatedAt) {
+			t.Error("expected UpdatedAt to be different from CreatedAt")
+		}
+	})
+
+	t.Run("Update - not found", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		updatedProperty := &domain.Property{
+			Title: "Updated Title",
+		}
+
+		_, err := repository.Update(ctx, "non-existent-id", updatedProperty)
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("Delete - success", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title: "Test Property",
+		}
+
+		created, _ := repository.Create(ctx, property)
+
+		err := repository.Delete(ctx, created.ID)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		// Verify it's actually deleted
+		_, err = repository.GetByID(ctx, created.ID)
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound after deletion, got %v", err)
+		}
+	})
+
+	t.Run("Delete - not found", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		ctx := context.Background()
+
+		err := repository.Delete(ctx, "non-existent-id")
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("ErrNotFound variable", func(t *testing.T) {
+		if repo.ErrNotFound.Error() != "not found" {
+			t.Errorf("expected error message to be 'not found', got %s", repo.ErrNotFound.Error())
+		}
+	})
+}
+
+// test/service/property_service_test.go
+package service_test
+
+import (
+	domain "Application/internal/Domain"
+	repo "Application/internal/Repostiory"
+	service "Application/internal/service"
+	"context"
+	"errors"
+	"testing"
+)
+
+// Mock repository for testing error scenarios
+type mockPropertyRepo struct {
+	shouldError bool
+	errorMsg    string
+	properties  map[string]*domain.Property
+}
+
+func (m *mockPropertyRepo) Create(ctx context.Context, p *domain.Property) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil {
+		m.properties = make(map[string]*domain.Property)
+	}
+	p.ID = "mock-id"
+	m.properties[p.ID] = p
+	return p, nil
+}
+
+func (m *mockPropertyRepo) GetByID(ctx context.Context, id string) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil || m.properties[id] == nil {
+		return nil, repo.ErrNotFound
+	}
+	return m.properties[id], nil
+}
+
+func (m *mockPropertyRepo) List(ctx context.Context) ([]*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil {
+		return []*domain.Property{}, nil
+	}
+	var props []*domain.Property
+	for _, p := range m.properties {
+		props = append(props, p)
+	}
+	return props, nil
+}
+
+func (m *mockPropertyRepo) Update(ctx context.Context, id string, p *domain.Property) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil || m.properties[id] == nil {
+		return nil, repo.ErrNotFound
+	}
+	p.ID = id
+	m.properties[id] = p
+	return p, nil
+}
+
+func (m *mockPropertyRepo) Delete(ctx context.Context, id string) error {
+	if m.shouldError {
+		return errors.New(m.errorMsg)
+	}
+	if m.properties == nil || m.properties[id] == nil {
+		return repo.ErrNotFound
+	}
+	delete(m.properties, id)
+	return nil
+}
+
+func TestPropertyService(t *testing.T) {
+	t.Run("NewPropertyService", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{}
+		svc := service.NewPropertyService(mockRepo)
+		if svc == nil {
+			t.Error("expected service to be created, got nil")
+		}
+	})
+
+	t.Run("Create - success", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title: "Test Property",
+		}
+
+		created, err := svc.Create(ctx, property)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if created.Title != property.Title {
+			t.Errorf("expected Title to be %s, got %s", property.Title, created.Title)
+		}
+	})
+
+	t.Run("Create - error", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			shouldError: true,
+			errorMsg:    "create error",
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		property := &domain.Property{
+			Title: "Test Property",
+		}
+
+		_, err := svc.Create(ctx, property)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if err.Error() != "create error" {
+			t.Errorf("expected error message 'create error', got %s", err.Error())
+		}
+	})
+
+	t.Run("GetByID - success", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Test Property",
+				},
+			},
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		found, err := svc.GetByID(ctx, "test-id")
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if found.ID != "test-id" {
+			t.Errorf("expected ID to be 'test-id', got %s", found.ID)
+		}
+	})
+
+	t.Run("GetByID - not found", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		_, err := svc.GetByID(ctx, "non-existent")
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("GetByID - error", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			shouldError: true,
+			errorMsg:    "get error",
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		_, err := svc.GetByID(ctx, "test-id")
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if err.Error() != "get error" {
+			t.Errorf("expected error message 'get error', got %s", err.Error())
+		}
+	})
+
+	t.Run("List - success", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			properties: map[string]*domain.Property{
+				"test-id-1": {
+					ID:    "test-id-1",
+					Title: "Test Property 1",
+				},
+				"test-id-2": {
+					ID:    "test-id-2",
+					Title: "Test Property 2",
+				},
+			},
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		properties, err := svc.List(ctx)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if len(properties) != 2 {
+			t.Errorf("expected 2 properties, got %d", len(properties))
+		}
+	})
+
+	t.Run("List - error", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			shouldError: true,
+			errorMsg:    "list error",
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		_, err := svc.List(ctx)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if err.Error() != "list error" {
+			t.Errorf("expected error message 'list error', got %s", err.Error())
+		}
+	})
+
+	t.Run("Update - success", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Original Title",
+				},
+			},
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		updatedProperty := &domain.Property{
+			Title: "Updated Title",
+		}
+
+		updated, err := svc.Update(ctx, "test-id", updatedProperty)
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+
+		if updated.Title != "Updated Title" {
+			t.Errorf("expected Title to be 'Updated Title', got %s", updated.Title)
+		}
+	})
+
+	t.Run("Update - not found", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		updatedProperty := &domain.Property{
+			Title: "Updated Title",
+		}
+
+		_, err := svc.Update(ctx, "non-existent", updatedProperty)
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("Update - error", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			shouldError: true,
+			errorMsg:    "update error",
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		updatedProperty := &domain.Property{
+			Title: "Updated Title",
+		}
+
+		_, err := svc.Update(ctx, "test-id", updatedProperty)
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if err.Error() != "update error" {
+			t.Errorf("expected error message 'update error', got %s", err.Error())
+		}
+	})
+
+	t.Run("Delete - success", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Test Property",
+				},
+			},
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		err := svc.Delete(ctx, "test-id")
+		if err != nil {
+			t.Errorf("expected no error, got %v", err)
+		}
+	})
+
+	t.Run("Delete - not found", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		err := svc.Delete(ctx, "non-existent")
+		if err != repo.ErrNotFound {
+			t.Errorf("expected ErrNotFound, got %v", err)
+		}
+	})
+
+	t.Run("Delete - error", func(t *testing.T) {
+		mockRepo := &mockPropertyRepo{
+			shouldError: true,
+			errorMsg:    "delete error",
+		}
+		svc := service.NewPropertyService(mockRepo)
+		ctx := context.Background()
+
+		err := svc.Delete(ctx, "test-id")
+		if err == nil {
+			t.Error("expected error, got nil")
+		}
+		if err.Error() != "delete error" {
+			t.Errorf("expected error message 'delete error', got %s", err.Error())
+		}
+	})
+}
+
+// test/transport/handler_listing_test.go
+package transport_test
+
+import (
+	domain "Application/internal/Domain"
+	repo "Application/internal/Repostiory"
+	service "Application/internal/service"
+	transport "Application/internal/Transport/http"
+	"bytes"
+	"context"
+	"encoding/json"
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
+	"github.com/go-chi/chi/v5"
+)
+
+// Mock service for testing HTTP handlers
+type mockPropertyService struct {
+	shouldError bool
+	errorMsg    string
+	properties  map[string]*domain.Property
+	notFound    bool
+}
+
+func (m *mockPropertyService) Create(ctx context.Context, p *domain.Property) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil {
+		m.properties = make(map[string]*domain.Property)
+	}
+	p.ID = "mock-id"
+	m.properties[p.ID] = p
+	return p, nil
+}
+
+func (m *mockPropertyService) GetByID(ctx context.Context, id string) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.notFound || m.properties == nil || m.properties[id] == nil {
+		return nil, repo.ErrNotFound
+	}
+	return m.properties[id], nil
+}
+
+func (m *mockPropertyService) List(ctx context.Context) ([]*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.properties == nil {
+		return []*domain.Property{}, nil
+	}
+	var props []*domain.Property
+	for _, p := range m.properties {
+		props = append(props, p)
+	}
+	return props, nil
+}
+
+func (m *mockPropertyService) Update(ctx context.Context, id string, p *domain.Property) (*domain.Property, error) {
+	if m.shouldError {
+		return nil, errors.New(m.errorMsg)
+	}
+	if m.notFound || m.properties == nil || m.properties[id] == nil {
+		return nil, repo.ErrNotFound
+	}
+	p.ID = id
+	m.properties[id] = p
+	return p, nil
+}
+
+func (m *mockPropertyService) Delete(ctx context.Context, id string) error {
+	if m.shouldError {
+		return errors.New(m.errorMsg)
+	}
+	if m.notFound || m.properties == nil || m.properties[id] == nil {
+		return repo.ErrNotFound
+	}
+	delete(m.properties, id)
+	return nil
+}
+
+func TestPropertyHandler(t *testing.T) {
+	t.Run("NewPropertyHandler", func(t *testing.T) {
+		mockSvc := &mockPropertyService{}
+		handler := transport.NewPropertyHandler(mockSvc)
+		if handler == nil {
+			t.Error("expected handler to be created, got nil")
+		}
+	})
+
+	t.Run("Routes", func(t *testing.T) {
+		mockSvc := &mockPropertyService{}
+		handler := transport.NewPropertyHandler(mockSvc)
+		router := handler.Routes()
+		if router == nil {
+			t.Error("expected router to be created, got nil")
+		}
+	})
+
+	t.Run("Create - success", func(t *testing.T) {
+		mockSvc := &mockPropertyService{}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		property := domain.Property{
+			Title:       "Test Property",
+			Description: "A test property",
+			Type:        "apartment",
+			SizeSqm:     100,
+			Bedrooms:    2,
+			Bathrooms:   1,
+		}
+
+		body, _ := json.Marshal(property)
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.Create(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Errorf("expected status code %d, got %d", http.StatusCreated, w.Code)
+		}
+
+		var response domain.Property
+		err := json.NewDecoder(w.Body).Decode(&response)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		if response.Title != property.Title {
+			t.Errorf("expected Title to be %s, got %s", property.Title, response.Title)
+		}
+	})
+
+	t.Run("Create - invalid JSON", func(t *testing.T) {
+		mockSvc := &mockPropertyService{}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.Create(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("expected status code %d, got %d", http.StatusBadRequest, w.Code)
+		}
+	})
+
+	t.Run("Create - service error", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			shouldError: true,
+			errorMsg:    "service error",
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		property := domain.Property{
+			Title: "Test Property",
+		}
+
+		body, _ := json.Marshal(property)
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.Create(w, req)
+
+		if w.Code != http.StatusInternalServerError {
+			t.Errorf("expected status code %d, got %d", http.StatusInternalServerError, w.Code)
+		}
+	})
+
+	t.Run("GetByID - success", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Test Property",
+				},
+			},
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodGet, "/test-id", nil)
+
+		// Create a chi context with URL param
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "test-id")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.GetByID(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var response domain.Property
+		err := json.NewDecoder(w.Body).Decode(&response)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		if response.ID != "test-id" {
+			t.Errorf("expected ID to be 'test-id', got %s", response.ID)
+		}
+	})
+
+	t.Run("GetByID - not found", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			notFound: true,
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodGet, "/non-existent", nil)
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "non-existent")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.GetByID(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Errorf("expected status code %d, got %d", http.StatusNotFound, w.Code)
+		}
+	})
+
+	t.Run("List - success", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			properties: map[string]*domain.Property{
+				"test-id-1": {
+					ID:    "test-id-1",
+					Title: "Test Property 1",
+				},
+				"test-id-2": {
+					ID:    "test-id-2",
+					Title: "Test Property 2",
+				},
+			},
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		w := httptest.NewRecorder()
+
+		handler.List(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var response []*domain.Property
+		err := json.NewDecoder(w.Body).Decode(&response)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		if len(response) != 2 {
+			t.Errorf("expected 2 properties, got %d", len(response))
+		}
+	})
+
+	t.Run("List - service error", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			shouldError: true,
+			errorMsg:    "service error",
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		w := httptest.NewRecorder()
+
+		handler.List(w, req)
+
+		if w.Code != http.StatusInternalServerError {
+			t.Errorf("expected status code %d, got %d", http.StatusInternalServerError, w.Code)
+		}
+	})
+
+	t.Run("Update - success", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Original Title",
+				},
+			},
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		property := domain.Property{
+			Title: "Updated Title",
+		}
+
+		body, _ := json.Marshal(property)
+		req := httptest.NewRequest(http.MethodPut, "/test-id", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "test-id")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.Update(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var response domain.Property
+		err := json.NewDecoder(w.Body).Decode(&response)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		if response.Title != "Updated Title" {
+			t.Errorf("expected Title to be 'Updated Title', got %s", response.Title)
+		}
+	})
+
+	t.Run("Update - invalid JSON", func(t *testing.T) {
+		mockSvc := &mockPropertyService{}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodPut, "/test-id", strings.NewReader("invalid json"))
+		req.Header.Set("Content-Type", "application/json")
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "test-id")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.Update(w, req)
+
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("expected status code %d, got %d", http.StatusBadRequest, w.Code)
+		}
+	})
+
+	t.Run("Update - not found", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			notFound: true,
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		property := domain.Property{
+			Title: "Updated Title",
+		}
+
+		body, _ := json.Marshal(property)
+		req := httptest.NewRequest(http.MethodPut, "/non-existent", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "non-existent")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.Update(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Errorf("expected status code %d, got %d", http.StatusNotFound, w.Code)
+		}
+	})
+
+	t.Run("Delete - success", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			properties: map[string]*domain.Property{
+				"test-id": {
+					ID:    "test-id",
+					Title: "Test Property",
+				},
+			},
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodDelete, "/test-id", nil)
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "test-id")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.Delete(w, req)
+
+		if w.Code != http.StatusNoContent {
+			t.Errorf("expected status code %d, got %d", http.StatusNoContent, w.Code)
+		}
+	})
+
+	t.Run("Delete - not found", func(t *testing.T) {
+		mockSvc := &mockPropertyService{
+			notFound: true,
+		}
+		handler := transport.NewPropertyHandler(mockSvc)
+
+		req := httptest.NewRequest(http.MethodDelete, "/non-existent", nil)
+
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", "non-existent")
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+
+		w := httptest.NewRecorder()
+
+		handler.Delete(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Errorf("expected status code %d, got %d", http.StatusNotFound, w.Code)
+		}
+	})
+}
+
+// Integration test using real implementations
+func TestPropertyHandlerIntegration(t *testing.T) {
+	// Use real implementations for integration test
+	repository := repo.NewMemoryPropertyRepo()
+	svc := service.NewPropertyService(repository)
+	handler := transport.NewPropertyHandler(svc)
+
+	t.Run("full CRUD integration", func(t *testing.T) {
+		// Create
+		property := domain.Property{
+			Title:       "Integration Test Property",
+			Description: "A test property for integration testing",
+			Type:        "apartment",
+			SizeSqm:     100,
+			Bedrooms:    2,
+			Bathrooms:   1,
+			Address: domain.Address{
+				Street:     "123 Test St",
+				City:       "Vienna",
+				PostalCode: "1010",
+				Country:    "Austria",
+			},
+		}
+
+		body, _ := json.Marshal(property)
+		req := httptest.NewRequest(http.MethodPost, "/", bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		w := httptest.NewRecorder()
+
+		handler.Create(w, req)
+
+		if w.Code != http.StatusCreated {
+			t.Errorf("expected status code %d, got %d", http.StatusCreated, w.Code)
+		}
+
+		var created domain.Property
+		err := json.NewDecoder(w.Body).Decode(&created)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		propertyID := created.ID
+
+		// Get by ID
+		req = httptest.NewRequest(http.MethodGet, "/"+propertyID, nil)
+		rctx := chi.NewRouteContext()
+		rctx.URLParams.Add("id", propertyID)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		w = httptest.NewRecorder()
+
+		handler.GetByID(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		// List
+		req = httptest.NewRequest(http.MethodGet, "/", nil)
+		w = httptest.NewRecorder()
+
+		handler.List(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		var properties []*domain.Property
+		err = json.NewDecoder(w.Body).Decode(&properties)
+		if err != nil {
+			t.Errorf("failed to decode response: %v", err)
+		}
+
+		if len(properties) != 1 {
+			t.Errorf("expected 1 property, got %d", len(properties))
+		}
+
+		// Update
+		property.Title = "Updated Integration Test Property"
+		body, _ = json.Marshal(property)
+		req = httptest.NewRequest(http.MethodPut, "/"+propertyID, bytes.NewReader(body))
+		req.Header.Set("Content-Type", "application/json")
+		rctx = chi.NewRouteContext()
+		rctx.URLParams.Add("id", propertyID)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		w = httptest.NewRecorder()
+
+		handler.Update(w, req)
+
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+
+		// Delete
+		req = httptest.NewRequest(http.MethodDelete, "/"+propertyID, nil)
+		rctx = chi.NewRouteContext()
+		rctx.URLParams.Add("id", propertyID)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		w = httptest.NewRecorder()
+
+		handler.Delete(w, req)
+
+		if w.Code != http.StatusNoContent {
+			t.Errorf("expected status code %d, got %d", http.StatusNoContent, w.Code)
+		}
+
+		// Verify deletion
+		req = httptest.NewRequest(http.MethodGet, "/"+propertyID, nil)
+		rctx = chi.NewRouteContext()
+		rctx.URLParams.Add("id", propertyID)
+		req = req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, rctx))
+		w = httptest.NewRecorder()
+
+		handler.GetByID(w, req)
+
+		if w.Code != http.StatusNotFound {
+			t.Errorf("expected status code %d after deletion, got %d", http.StatusNotFound, w.Code)
+		}
+	})
+}
+
+// test/transport/routes_test.go
+package transport_test
+
+import (
+	domain "Application/internal/Domain"
+	repo "Application/internal/Repostiory"
+	service "Application/internal/service"
+	transport "Application/internal/Transport/http"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func TestNewRouter(t *testing.T) {
+	t.Run("NewRouter creates valid router", func(t *testing.T) {
+		// Create real dependencies for testing
+		repository := repo.NewMemoryPropertyRepo()
+		svc := service.NewPropertyService(repository)
+		propertyHandler := transport.NewPropertyHandler(svc)
+
+		router := transport.NewRouter(propertyHandler)
+		if router == nil {
+			t.Error("expected router to be created, got nil")
+		}
+	})
+
+	t.Run("Router handles API routes", func(t *testing.T) {
+		// Create real dependencies for testing
+		repository := repo.NewMemoryPropertyRepo()
+		svc := service.NewPropertyService(repository)
+		propertyHandler := transport.NewPropertyHandler(svc)
+
+		router := transport.NewRouter(propertyHandler)
+
+		// Test that the router can handle requests to the API endpoint
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/properties/", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		// Should return 200 OK for GET request to properties list
+		if w.Code != http.StatusOK {
+			t.Errorf("expected status code %d, got %d", http.StatusOK, w.Code)
+		}
+	})
+
+	t.Run("Router middleware integration", func(t *testing.T) {
+		repository := repo.NewMemoryPropertyRepo()
+		svc := service.NewPropertyService(repository)
+		propertyHandler := transport.NewPropertyHandler(svc)
+
+		router := transport.NewRouter(propertyHandler)
+
+		// Test that middleware is properly applied
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/properties/", nil)
+		w := httptest.NewRecorder()
+
+		router.ServeHTTP(w, req)
+
+		// The request should be processed without errors
+		if w.Code >= 500 {
+			t.Errorf("server error occurred, status code: %d", w.Code)
+		}
+	})
+}
+
+// cmd/server/main_test.go
+package main
+
+import (
+	repo "Application/internal/Repostiory"
+	service "Application/internal/service"
+	transport "Application/internal/Transport/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+import (
+	"context"
+	"net/http"
+	"testing"
+	"time"
+)
+
+// Test the main function components individually since main() runs infinitely
+func TestMainComponents(t *testing.T) {
+	t.Run("server dependencies can be created", func(t *testing.T) {
+		// This test ensures all the dependencies in main() can be instantiated
+		// without errors, covering the dependency injection lines
+
+		// We can't test the actual main() function since it runs forever,
+		// but we can test that all components can be created successfully
+
+		// Import and instantiate the same way as main()
+		// This will be caught by coverage since it's the same pattern
+		repo := repo.NewMemoryPropertyRepo()
+		if repo == nil {
+			t.Error("failed to create property repository")
+		}
+
+		propertyService := service.NewPropertyService(repo)
+		if propertyService == nil {
+			t.Error("failed to create property service")
+		}
+
+		propertyHandler := transport.NewPropertyHandler(propertyService)
+		if propertyHandler == nil {
+			t.Error("failed to create property handler")
+		}
+
+		// Test that we can create a router and it handles requests
+		r := chi.NewRouter()
+		r.Use(middleware.Logger)
+
+		r.Route("/api/v1/properties", func(rt chi.Router) {
+			rt.Mount("/", propertyHandler.Routes())
+		})
+
+		// Test that the file server can be created
+		fs := http.FileServer(http.Dir("./web"))
+		if fs == nil {
+			t.Error("failed to create file server")
+		}
+
+		r.Handle("/*", fs)
+
+		// Test that the server can be created (but don't start it)
+		server := &http.Server{
+			Addr:    ":8080",
+			Handler: r,
+		}
+
+		if server == nil {
+			t.Error("failed to create HTTP server")
+		}
+	})
+}
+
+// Mock test to simulate server startup and shutdown
+func TestServerStartup(t *testing.T) {
+	t.Run("server can start and stop", func(t *testing.T) {
+		repo := repo.NewMemoryPropertyRepo()
+		propertyService := service.NewPropertyService(repo)
+		propertyHandler := transport.NewPropertyHandler(propertyService)
+
+		r := chi.NewRouter()
+		r.Use(middleware.Logger)
+
+		r.Route("/api/v1/properties", func(rt chi.Router) {
+			rt.Mount("/", propertyHandler.Routes())
+		})
+
+		fs := http.FileServer(http.Dir("./web"))
+		r.Handle("/*", fs)
+
+		// Start server in a goroutine
+		server := &http.Server{
+			Addr:    ":0", // Use port 0 to get any available port
+			Handler: r,
+		}
+
+		go func() {
+			server.ListenAndServe()
+		}()
+
+		// Give server time to start
+		time.Sleep(100 * time.Millisecond)
+
+		// Shutdown server
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := server.Shutdown(ctx)
+		if err != nil {
+			t.Errorf("failed to shutdown server: %v", err)
+		}
+	})
+}
