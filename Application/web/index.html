@@ -27,14 +27,45 @@
 
     <h2 class="text-xl font-semibold text-gray-700 mb-4">Add Property</h2>
     <form id="addForm" class="space-y-4 mb-8">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input type="text" id="title" placeholder="Title" required
                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <input type="text" id="city" placeholder="City" required
-                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <select id="type" required
+                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Select Type</option>
+                <option value="house">House</option>
+                <option value="apartment">Apartment</option>
+                <option value="condo">Condo</option>
+                <option value="townhouse">Townhouse</option>
+                <option value="land">Land</option>
+            </select>
+        </div>
+
+        <textarea id="description" placeholder="Description" rows="3"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <input type="number" id="size" placeholder="Size (sqm)" required
                    class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="number" id="bedrooms" placeholder="Bedrooms" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="number" id="bathrooms" placeholder="Bathrooms" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
         </div>
+
+        <h3 class="text-lg font-semibold text-gray-700 mt-4">Address</h3>
+        <input type="text" id="street" placeholder="Street" required
+               class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <input type="text" id="city" placeholder="City" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="postalCode" placeholder="Postal Code" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <input type="text" id="country" placeholder="Country" required
+                   class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+
         <button type="submit"
                 class="w-full sm:w-auto px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
             Add Property
@@ -66,6 +97,10 @@
                                 class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                             Delete
                         </button>
+                        <button onclick="updateProperty('${p.id}')"
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                            Update
+                        </button>
                     </div>
                 `;
             list.appendChild(div);
@@ -74,6 +109,11 @@
 
     async function deleteProperty(id) {
         await fetch(API + "/" + id, { method: "DELETE" });
+        loadProperties();
+    }
+
+    async function updateProperty(id) {
+        await fetch(API + "/" + id, { method: "UPDATE" });
         loadProperties();
     }
 
