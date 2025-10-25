@@ -3,27 +3,27 @@ Application/
 │  └─ server/
 │     └─ main.go                # program entry, wire dependencies, start http server
 ├─ internal/
-│  ├─ domain/                   # pure domain structs and domain-specific errors
-│  │  ├─ property.go
-│  │  └─ ...
-│  ├─ repo/                     # repository interfaces (and maybe implementations)
+│  ├─ Domain/                   # pure domain structs and domain-specific errors
+│  │  ├─ Property.go
+│  │  └─ User.go
+│  ├─ Repository/                     # repository interfaces (and maybe implementations)
 │  │  ├─ property_mem.go
+│  │  ├─ user_repository.go
 │  ├─ service/                  # business logic / use-cases
 │  │  ├─ property_service.go
+│  │  ├─ user_service.go
 │  ├─ transport/
 │  │  └─ http/                  # http handlers, router
-│  │     ├─ handler_listing.go
-│  │     ├─ routes.go
+│  │     ├─ handler_property.go
+│  │     ├─ handler_user.go
+│  │     ├─ router.go
 ├─ web/                         # small frontend: React app or static SPA
 │  ├─ index.html
+│  ├─ edit.html
+│  ├─ login.html                #I have not created this, create it with base login as admin admin
 ├─ test/                        # integration tests, docker-compose for test db
-│  └─ Domain/
-│  └─ Repository/
-│  └─ service/
-│  └─ transport/
-├─ scripts/
-│  └─ run_local.sh
-├─ docker-compose.yml
-├─ Dockerfile
-├─ Makefile
+│  └─ Domain/                   #Write domain tests for me
+│  └─ Repository/               # Write repository tests for me
+│  └─ service/                  # write service tests for me
+│  └─ transport/                # write http tests for me
 └─ go.mod

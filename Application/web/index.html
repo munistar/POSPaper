@@ -23,7 +23,12 @@
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col items-center p-4 sm:p-6">
 <div class="w-full max-w-4xl bg-white rounded-lg shadow-lg p-6 sm:p-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Real Estate Properties</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-gray-800">Real Estate Properties</h1>
+        <a href="login.html" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+            Logout
+        </a>
+    </div>
 
     <h2 class="text-xl font-semibold text-gray-700 mb-4">Add Property</h2>
     <form id="addForm" class="space-y-4 mb-8">
@@ -79,62 +84,104 @@
 <script>
     const API = "http://localhost:8080/api/v1/properties";
 
+    // Check if user is logged in
+    window.addEventListener('DOMContentLoaded', () => {
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+    });
+
     async function loadProperties() {
-        const res = await fetch(API);
-        const data = await res.json();
-        const list = document.getElementById("list");
-        list.innerHTML = "";
-        data.forEach(p => {
-            const div = document.createElement("div");
-            div.className = "property bg-gray-50 p-4 rounded-lg shadow-sm hover-scale fade-in";
-            div.innerHTML = `
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-800">${p.title}</h3>
-                            <p class="text-gray-600">${p.size_sqm} sqm, ${p.address.city}</p>
+        try {
+            const res = await fetch(API);
+            const data = await res.json();
+            const list = document.getElementById("list");
+            list.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-center py-4">No properties yet. Add one above!</p>';
+                return;
+            }
+
+            data.forEach(p => {
+                const div = document.createElement("div");
+                div.className = "property bg-gray-50 p-4 rounded-lg shadow-sm hover-scale fade-in";
+                div.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-semibold text-gray-800">${p.title || 'Untitled'}</h3>
+                            <p class="text-gray-600 mb-2">${p.description || 'No description'}</p>
+                            <div class="text-sm text-gray-600">
+                                <p><strong>Type:</strong> ${p.type || 'N/A'}</p>
+                                <p><strong>Size:</strong> ${p.size_sqm || 0} sqm</p>
+                                <p><strong>Bedrooms:</strong> ${p.bedrooms || 0} | <strong>Bathrooms:</strong> ${p.bathrooms || 0}</p>
+                                <p><strong>Location:</strong> ${p.address?.street || ''}, ${p.address?.city || ''}, ${p.address?.country || ''}</p>
+                            </div>
                         </div>
-                        <button onclick="deleteProperty('${p.id}')"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                            Delete
-                        </button>
-                        <button onclick="updateProperty('${p.id}')"
-                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
-                            Update
-                        </button>
+                        <div class="flex gap-2 ml-4">
+                            <a href="edit.html?id=${p.id}"
+                                class="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors">
+                                Edit
+                            </a>
+                            <button onclick="deleteProperty('${p.id}')"
+                                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                                Delete
+                            </button>
+                        </div>
                     </div>
                 `;
-            list.appendChild(div);
-        });
+                list.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error loading properties:', error);
+            document.getElementById("list").innerHTML = '<p class="text-red-500 text-center py-4">Error loading properties</p>';
+        }
     }
 
     async function deleteProperty(id) {
-        await fetch(API + "/" + id, { method: "DELETE" });
-        loadProperties();
-    }
+        if (!confirm('Are you sure you want to delete this property?')) {
+            return;
+        }
 
-    async function updateProperty(id) {
-        await fetch(API + "/" + id, { method: "UPDATE" });
-        loadProperties();
+        try {
+            await fetch(API + "/" + id, { method: "DELETE" });
+            loadProperties();
+        } catch (error) {
+            console.error('Error deleting property:', error);
+            alert('Failed to delete property');
+        }
     }
 
     document.getElementById("addForm").addEventListener("submit", async (e) => {
         e.preventDefault();
+
         const prop = {
             title: document.getElementById("title").value,
-            description: "",
-            type: "apartment",
+            description: document.getElementById("description").value,
+            type: document.getElementById("type").value,
             size_sqm: parseInt(document.getElementById("size").value),
-            bedrooms: 0,
-            bathrooms: 0,
-            address: { street: "", city: document.getElementById("city").value, postal_code: "", country: "" }
+            bedrooms: parseInt(document.getElementById("bedrooms").value),
+            bathrooms: parseInt(document.getElementById("bathrooms").value),
+            address: {
+                street: document.getElementById("street").value,
+                city: document.getElementById("city").value,
+                postal_code: document.getElementById("postalCode").value,
+                country: document.getElementById("country").value
+            }
         };
-        await fetch(API, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(prop)
-        });
-        e.target.reset();
-        loadProperties();
+
+        try {
+            await fetch(API, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(prop)
+            });
+            e.target.reset();
+            loadProperties();
+        } catch (error) {
+            console.error('Error adding property:', error);
+            alert('Failed to add property');
+        }
     });
 
     loadProperties();

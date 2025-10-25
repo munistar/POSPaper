@@ -1,4 +1,4 @@
-package Repostiory
+package Repository
 
 import (
 	domain "Application/internal/Domain"

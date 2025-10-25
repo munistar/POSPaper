@@ -2,7 +2,7 @@ package service
 
 import (
 	domain "Application/internal/Domain"
-	repo "Application/internal/Repostiory"
+	repo "Application/internal/Repository"
 	"context"
 )
 

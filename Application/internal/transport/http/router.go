@@ -26,13 +26,11 @@ func NewRouter(propertyHandler *PropertyHandler) http.Handler {
 		})
 	})
 
-	// API routes
 	r.Route("/api/v1/properties", func(rt chi.Router) {
 		rt.Mount("/", propertyHandler.Routes())
 	})
 
-	// Serve static files from ./static directory
-	r.Handle("/*", http.FileServer(http.Dir("./static")))
+	r.Handle("/*", http.FileServer(http.Dir("./web")))
 
 	return r
 }
